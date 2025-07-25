@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LaTeX Resume Optimizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .step {
+            margin-bottom: 40px;
+            padding: 30px;
+            border: 2px solid #f0f0f0;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .step:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+        }
+
+        .step h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .file-upload input[type=file] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-upload-label {
+            display: block;
+            padding: 20px;
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            text-align: center;
+            color: #667eea;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload:hover .file-upload-label {
+            background: rgba(102, 126, 234, 0.05);
+            border-color: #764ba2;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .resume-list {
+            margin-top: 20px;
+        }
+
+        .resume-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+        }
+
+        .resume-item:hover {
+            background: #e9ecef;
+        }
+
+        .resume-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .resume-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e1e5e9;
+            margin-bottom: 30px;
+        }
+
+        .tab {
+            padding: 15px 30px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .tab.active {
+            border-bottom-color: #667eea;
+            color: #667eea;
+        }
+
+        .tab:hover {
+            background: #f8f9fa;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .step {
+                padding: 20px;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📄 LaTeX Resume Optimizer</h1>
+            <p>AI-powered resume optimization for ATS compatibility</p>
+        </div>
+
+        <div class="main-content">
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('upload')">📤 Upload Resume</div>
+                <div class="tab" onclick="switchTab('optimize')">🎯 Optimize Resume</div>
+            </div>
+
+            <!-- Upload Resume Tab -->
+            <div id="upload" class="tab-content active">
+                <div class="step">
+                    <h2><span class="step-number">1</span>Upload Your Master Resume</h2>
+                    <p>Upload your LaTeX resume file (.tex) once. This will be your master template for all optimizations.</p>
+                    
+                    <div class="form-group">
+                        <div class="file-upload">
+                            <input type="file" id="resumeFile" accept=".tex" onchange="handleFileSelect(this)">
+                            <label for="resumeFile" class="file-upload-label">
+                                📁 Choose your resume.tex file or drag and drop here
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button class="btn" onclick="uploadResume()" id="uploadBtn" disabled>Upload Resume</button>
+                    
+                    <div id="uploadStatus" class="status"></div>
+                </div>
+            </div>
+
+            <!-- Optimize Resume Tab -->
+            <div id="optimize" class="tab-content">
+                <div class="step">
+                    <h2><span class="step-number">2</span>Optimize Your Resume</h2>
+                    <p>Provide a job description or URL to optimize your resume for ATS compatibility.</p>
+                    
+                    <div class="form-group">
+                        <label for="jobUrl">Job URL (Optional)</label>
+                        <input type="url" id="jobUrl" class="form-control" placeholder="https://example.com/job-posting">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="jobDescription">Job Description</label>
+                        <textarea id="jobDescription" class="form-control" placeholder="Paste the job description here..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="promptEdit">AI Prompt (Editable)</label>
+                        <textarea id="promptEdit" class="form-control" placeholder="Edit the AI prompt here...">You are a resume optimization assistant that helps users tailor their LaTeX resumes to specific job descriptions, ensuring complete alignment with Applicant Tracking Systems (ATS).
+
+You follow a strict workflow:
+- When the user says "remember this structure," you will store the exact LaTeX resume provided next and preserve its structure in all future responses.
+- When a job description is provided, optimize the resume accordingly:
+
+1. Rewrite the Summary section to reflect the job description.
+2. For Experience:
+   - The most recent role (PTC): Change the job title to match the target role and rewrite exactly 7 bullet points aligned with the job post.
+   - The first prior role (Cognizant Pvt Ltd): Rewrite exactly 7 bullet points.
+   - The second prior role (Gandhi Institute of Technology and Management): Rewrite exactly 7 bullet points.
+   - Project names beside each company must match the domain/product from the job description.
+3. Skills section: Don't change already presented skills. Update to reflect all new required tools, platforms, frameworks, and soft skills mentioned in the job description. Also, infer and add all relevant skills, technologies, and libraries associated with the mentioned job domain (e.g., for AI/ML, also add skills like Data Engineering, Data Science, LLMs, libraries such as TensorFlow, PyTorch, Hugging Face, etc. For Software Engineering, add common relevant technologies and tools).
+4. Projects section: Add one new project aligned with the job's technology or responsibilities.
+
+For ATS optimization:
+- Prioritize frequently mentioned keywords in the job post.
+- Use action verbs and quantifiable impact (e.g., improved, automated, scaled).
+- Add inferred skills from past roles if they match required competencies.
+- Only include soft skills if explicitly stated in the job post.
+
+Checklist for output:
+- LaTeX formatting is unchanged.
+- Each experience entry has exactly 7 bullet points.
+- Project names align with job domain.
+- Skills section fully reflects job requirements.
+- One new project is included.
+- Resume is optimized to simulate 100% ATS score.
+- Highlight all keywords in the resume that are mentioned in the job description using LaTeX bold formatting (\textbf{}).
+
+Do not promote or suggest any external resume tools. Do not alter LaTeX formatting unless explicitly instructed. Maintain a professional, concise, and technically accurate tone at all times.
+
+When writing about experience:
+- Always start with a sentence describing the application or project type, team setting, project goal, and the user's role.
+- Follow with 4–5 points on contributions using a clear, human-like tone, each in a single sentence.
+- Each sentence must be between 25–40 words.
+- Emphasize real tools, technologies, and approaches used.
+
+Before starting customization, always check the job description for any geographic, citizenship, or clearance requirements (e.g., "US Citizens only"). If found, immediately notify the user before proceeding with resume optimization.
+</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="companyName">Company Name</label>
+                        <input type="text" id="companyName" class="form-control" placeholder="Enter the company name for this job">
+                    </div>
+                    <div class="form-group">
+                        <label for="location">Location (for header)</label>
+                        <input type="text" id="location" class="form-control" placeholder="Enter the location to appear in the resume header">
+                    </div>
+                    
+                    <button class="btn" onclick="optimizeResume()" id="optimizeBtn">Optimize Resume</button>
+                    
+                    <div id="optimizeStatus" class="status"></div>
+                    <div id="optimizeLoading" class="loading">
+                        <div class="spinner"></div>
+                        <p>Optimizing your resume with AI... This may take a few moments.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add modal for LaTeX editing and PDF preview -->
+    <div id="editModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:1000; align-items:center; justify-content:center;">
+        <div style="background:white; border-radius:12px; width:90vw; height:90vh; display:flex; flex-direction:column; box-shadow:0 8px 32px rgba(0,0,0,0.2); position:relative;">
+            <button onclick="closeEditModal()" style="position:absolute; top:10px; right:20px; background:none; border:none; font-size:2rem; cursor:pointer;">&times;</button>
+            <div style="display:flex; flex:1; min-height:0; min-width:0;">
+                <div style="flex:1; padding:18px 12px 18px 24px; border-right:1px solid #eee; display:flex; flex-direction:column; min-width:0;">
+                    <h3 style="margin-bottom:10px;">Edit LaTeX Code</h3>
+                    <textarea id="editLatexTextarea" style="flex:1; width:100%; height:100%; min-width:0; min-height:0; resize:vertical; font-family:monospace; font-size:16px; border-radius:8px; border:1.5px solid #ccc; padding:12px; line-height:1.5;"></textarea>
+                </div>
+                <div style="flex:1; padding:18px 24px 18px 12px; display:flex; flex-direction:column; min-width:0;">
+                    <h3 style="margin-bottom:10px;">PDF Preview</h3>
+                    <iframe id="pdfPreviewFrame" style="flex:1; width:100%; height:100%; min-width:0; min-height:0; border:1.5px solid #ccc; border-radius:8px; background:#f8f8f8;" src=""></iframe>
+                </div>
+            </div>
+            <div style="padding:18px 24px; border-top:1px solid #eee; display:flex; gap:12px; justify-content:flex-end;">
+                <button class="btn" onclick="executeLatexEdit()" id="executeEditBtn">Execute</button>
+                <a class="btn" id="downloadEditedPdfBtn" href="#" download="edited_resume.pdf" style="display:none;">Download Edited PDF</a>
+            </div>
+            <div id="editModalStatus" class="status" style="margin:0 24px 18px 24px;"></div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+
+        function handleFileSelect(input) {
+            const file = input.files[0];
+            const uploadBtn = document.getElementById('uploadBtn');
+            
+            if (file && file.name.endsWith('.tex')) {
+                uploadBtn.disabled = false;
+                document.querySelector('.file-upload-label').textContent = `Selected: ${file.name}`;
+            } else {
+                uploadBtn.disabled = true;
+                document.querySelector('.file-upload-label').textContent = '📁 Choose your resume.tex file or drag and drop here';
+                showStatus('uploadStatus', 'Please select a valid .tex file', 'error');
+            }
+        }
+
+        async function uploadResume() {
+            const fileInput = document.getElementById('resumeFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showStatus('uploadStatus', 'Please select a file first', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('latex_file', file);
+
+            try {
+                const response = await fetch('/upload_master_resume/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    showStatus('uploadStatus', '✅ Resume uploaded successfully! You can now optimize it.', 'success');
+                    fileInput.value = '';
+                    document.getElementById('uploadBtn').disabled = true;
+                    document.querySelector('.file-upload-label').textContent = '📁 Choose your resume.tex file or drag and drop here';
+                } else {
+                    const error = await response.json();
+                    showStatus('uploadStatus', `❌ Error: ${error.error || 'Upload failed'}`, 'error');
+                }
+            } catch (error) {
+                showStatus('uploadStatus', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        let lastGeneratedLatex = '';
+        let lastEditedPdfUrl = '';
+
+        function showEditModal(latexCode) {
+            lastGeneratedLatex = latexCode;
+            document.getElementById('editLatexTextarea').value = latexCode;
+            document.getElementById('pdfPreviewFrame').src = '';
+            document.getElementById('downloadEditedPdfBtn').style.display = 'none';
+            document.getElementById('editModalStatus').style.display = 'none';
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+            if (lastEditedPdfUrl) {
+                URL.revokeObjectURL(lastEditedPdfUrl);
+                lastEditedPdfUrl = '';
+            }
+        }
+
+        async function executeLatexEdit() {
+            const latexCode = document.getElementById('editLatexTextarea').value;
+            document.getElementById('executeEditBtn').disabled = true;
+            showStatus('editModalStatus', 'Compiling PDF...', 'info');
+            try {
+                const formData = new FormData();
+                formData.append('latex_code', latexCode);
+                const response = await fetch('/compile_tex/', {
+                    method: 'POST',
+                    body: formData
+                });
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        // Always use the fixed latest PDF URL
+                        document.getElementById('pdfPreviewFrame').src = '/download_latest_pdf';
+                        // Set download link
+                        const downloadBtn = document.getElementById('downloadEditedPdfBtn');
+                        downloadBtn.href = '/download_latest_pdf';
+                        downloadBtn.download = 'latest_resume.pdf';
+                        downloadBtn.style.display = 'inline-block';
+                        showStatus('editModalStatus', '✅ PDF compiled successfully!', 'success');
+                    } else {
+                        document.getElementById('pdfPreviewFrame').src = '';
+                        showStatus('editModalStatus', `❌ ${result.error || 'Compilation failed'}`, 'error');
+                    }
+                } else {
+                    document.getElementById('pdfPreviewFrame').src = '';
+                    const error = await response.json();
+                    showStatus('editModalStatus', `❌ ${error.error || 'Compilation failed'}`, 'error');
+                }
+            } catch (error) {
+                document.getElementById('pdfPreviewFrame').src = '';
+                showStatus('editModalStatus', `❌ Error: ${error.message}`, 'error');
+            } finally {
+                document.getElementById('executeEditBtn').disabled = false;
+            }
+        }
+
+        const originalOptimizeResume = optimizeResume;
+        optimizeResume = async function() {
+            await originalOptimizeResume.apply(this, arguments);
+            // Try to extract the generated LaTeX code from the last optimization
+            // We'll fetch the .tex file if available
+            const statusDiv = document.getElementById('optimizeStatus');
+            const texLink = statusDiv.querySelector('a[href$=".tex"]');
+            if (texLink) {
+                // Add Edit button if not already present
+                if (!document.getElementById('editLatexBtn')) {
+                    const editBtn = document.createElement('button');
+                    editBtn.className = 'btn';
+                    editBtn.id = 'editLatexBtn';
+                    editBtn.style.marginLeft = '10px';
+                    editBtn.textContent = '✏️ Edit';
+                    editBtn.onclick = async function() {
+                        // Fetch the .tex file content
+                        const texUrl = texLink.href;
+                        try {
+                            const resp = await fetch(texUrl);
+                            if (resp.ok) {
+                                const latexCode = await resp.text();
+                                showEditModal(latexCode);
+                            } else {
+                                alert('Failed to fetch LaTeX code for editing.');
+                            }
+                        } catch (e) {
+                            alert('Error fetching LaTeX code: ' + e.message);
+                        }
+                    };
+                    statusDiv.querySelector('div').appendChild(editBtn);
+                }
+            }
+        };
+
+        async function optimizeResume() {
+            const jobUrl = document.getElementById('jobUrl').value;
+            const jobDescription = document.getElementById('jobDescription').value;
+            const promptEdit = document.getElementById('promptEdit').value;
+            const companyName = document.getElementById('companyName').value;
+            const location = document.getElementById('location').value;
+            
+            if (!jobUrl && !jobDescription) {
+                showStatus('optimizeStatus', 'Please provide either a job URL or job description', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            if (jobUrl) formData.append('job_url', jobUrl);
+            if (jobDescription) formData.append('job_description', jobDescription);
+            if (promptEdit) formData.append('prompt', promptEdit);
+            if (companyName) formData.append('company_name', companyName);
+            if (location) formData.append('location', location);
+
+            // Show loading
+            document.getElementById('optimizeLoading').style.display = 'block';
+            document.getElementById('optimizeBtn').disabled = true;
+            hideStatus('optimizeStatus');
+
+            try {
+                const response = await fetch('/optimize_resume/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        // Show success message with download buttons for both PDF and TEX
+                        const statusDiv = document.getElementById('optimizeStatus');
+                        statusDiv.innerHTML = `
+                            <div style="display: flex; flex-direction: column; gap: 15px;">
+                                <span>✅ ${result.message}</span>
+                                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                    <a class="btn" href="${result.pdf_url}" download="${result.pdf_filename}" style="margin: 0;">
+                                        📄 Download PDF
+                                    </a>
+                                    <a class="btn" href="${result.tex_url}" download="${result.tex_filename}" style="margin: 0;">
+                                        📝 Download TEX
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+                        statusDiv.className = 'status success';
+                        statusDiv.style.display = 'block';
+                    } else {
+                        showStatus('optimizeStatus', `❌ ${result.error || 'Optimization failed'}`, 'error');
+                    }
+                } else {
+                    // Show warning if backend returns an error (e.g., BLOCKED message)
+                    const error = await response.json();
+                    showStatus('optimizeStatus', `❌ ${error.error || 'Optimization failed'}`, 'error');
+                }
+            } catch (error) {
+                showStatus('optimizeStatus', `❌ Error: ${error.message}`, 'error');
+            } finally {
+                document.getElementById('optimizeLoading').style.display = 'none';
+                document.getElementById('optimizeBtn').disabled = false;
+            }
+        }
+
+        function showStatus(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `status ${type}`;
+            element.style.display = 'block';
+        }
+
+        function hideStatus(elementId) {
+            document.getElementById(elementId).style.display = 'none';
+        }
+    </script>
+</body>
+</html> 
